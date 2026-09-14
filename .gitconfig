@@ -1,0 +1,13 @@
+[core]
+	longpaths = true
+    autocrlf = false
+
+[commit]
+    template = ./.gitmessage
+
+[user]
+    name = Richeve Bebedor
+    email = richeve.bebedor@gmail.com
+
+[core]
+    sshCommand = ssh -i ./.credentials/key-system -o IdentitiesOnly=yes

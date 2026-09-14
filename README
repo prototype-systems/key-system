@@ -1,0 +1,224 @@
+key-system
+==========
+
+A local key-value storage system composed of a background HTTP service and a
+CLI interface. Keys are held in an in-memory BuntDB cache with optional
+on-demand persistence to disk.
+
+---
+
+Components
+----------
+
+keys-data-service (Go)
+    HTTP service that owns the key store. Listens on port 7375 by default and
+    exposes a REST API under /service/data/keys. The cache is in-memory during
+    operation and can be flushed to disk on request.
+
+keys-data-service-cli (Zig)
+    Command-line interface that communicates with the running service over HTTP.
+    All commands output JSON to stdout or optionally write it to a file.
+
+install-binary-tool (Nim)
+    Utility used during setup to copy the compiled binaries to their install
+    locations.
+
+---
+
+Installation
+------------
+
+The binaries directory ships with a self-contained installer. No build tools
+or additional dependencies are required.
+
+1. Navigate to the platform binaries directory.
+
+        windows/
+
+2. Run the installer with no arguments.
+
+        install-binary-tool.exe install-binary
+
+    With no argument it scans its own directory, installs every sibling
+    executable, and skips itself.
+
+    To install a single binary explicitly:
+
+        install-binary-tool.exe install-binary C:\path\to\windows\keys-data-service.exe
+
+3. The executables are copied to:
+
+        %USERPROFILE%\.local\bin\
+
+    The installer also registers that directory in the current user's PATH
+    (User scope) so the commands are available in new terminal sessions.
+
+4. Reopen your terminal, then verify:
+
+        keys-data-service-cli --version
+
+---
+
+Requirements
+------------
+
+- keys-data-service must be running before using the CLI.
+- Boot the service with:
+
+        keys-data-service-cli boot
+
+---
+
+Configuration
+-------------
+
+The CLI reads the service address from environment variables.
+
+    KEYS_DATA_SERVICE_HOST   Base URL of the service  (default: http://localhost)
+    KEYS_DATA_SERVICE_PORT   Port the service listens on  (default: 7375)
+
+The service stores its persistence file in the data/ directory relative to
+the working directory it was started from.
+
+---
+
+CLI Usage
+---------
+
+    keys-data-service-cli [global options] <command> [command options] [arguments]
+
+Global Options
+
+    --help       Print help
+    --version    Print CLI version
+
+Service Commands
+
+    boot           Spawn the keys-data-service as a detached background process
+    health         Check whether the service is responsive
+    version        Print the running service version
+    start          Send a start signal to the service
+    stop           Send a stop signal to the service
+    abort          Send an abort signal to the service
+    kill           Send a kill signal to the service
+    persist        Flush the in-memory cache to disk without interrupting service
+
+Key Commands
+
+    list           List keys with pagination
+    get            Get a key by reference
+    push           Push a key with a client-supplied reference
+    add            Add a key and let the service generate its reference
+    pop            Remove a key by reference
+
+Group Commands
+
+    group-count    Count keys in a group
+    group-get      Get a key value by group and key name
+    group-set      Set a key value by group and key name
+
+---
+
+Key Commands Reference
+----------------------
+
+list
+
+    keys-data-service-cli list --skip=N --limit=N [--output_directory=DIR] [--output_file=FILE]
+
+    --skip=N                   Keys to skip (required)
+    --limit=N                  Keys to return, max 100 (required)
+    --output_directory=DIR     Absolute path to write output (optional)
+    --output_file=FILE         Output filename (optional)
+
+get
+
+    keys-data-service-cli get --reference=REF [--output_directory=DIR] [--output_file=FILE]
+
+    --reference=REF            Key reference identifier (required)
+
+push
+
+    keys-data-service-cli push --key_file=FILE
+
+    --key_file=FILE            JSON file containing the key payload (required)
+
+    Sends the key as-is using the reference embedded in the file.
+
+add
+
+    keys-data-service-cli add --key_message_file=FILE
+
+    --key_message_file=FILE    JSON file containing the key message (required)
+
+    The service generates and returns a new unique reference.
+
+pop
+
+    keys-data-service-cli pop --reference=REF [--output_directory=DIR] [--output_file=FILE]
+
+    --reference=REF            Key reference to remove (required)
+
+group-count
+
+    keys-data-service-cli group-count --group=GROUP
+
+    --group=GROUP              Group name (required)
+
+group-get
+
+    keys-data-service-cli group-get --group=GROUP --key=KEY [--output_directory=DIR] [--output_file=FILE]
+
+    --group=GROUP              Group name (required)
+    --key=KEY                  Key name within the group (required)
+
+group-set
+
+    keys-data-service-cli group-set --group=GROUP --key=KEY --group_set_key_message_file=FILE
+
+    --group=GROUP                        Group name (required)
+    --key=KEY                            Key name within the group (required)
+    --group_set_key_message_file=FILE    JSON file with a "value" field (required)
+
+---
+
+Service API
+-----------
+
+Base path: /service/data/keys
+
+    POST   /add                    Add a key (service-generated reference)
+    POST   /push                   Push a key (client-supplied reference)
+    DELETE /pop/:reference         Remove a key
+    GET    /                       List keys  (?skip=N&limit=N)
+    GET    /:reference             Get a key
+    POST   /persist                Persist cache to disk
+    GET    /:group/count           Count keys in a group
+    GET    /:group/:key            Get a group key value
+    POST   /:group/:key            Set a group key value
+
+Service control routes are exposed under /service/data/keys as well and are
+proxied through the same fiber server.
+
+---
+
+Binaries
+--------
+
+    windows/keys-data-service.exe        HTTP service executable
+    windows/keys-data-service-cli.exe    CLI executable
+    windows/install-binary-tool.exe      Binary install helper
+
+---
+
+Author
+------
+
+Richeve Bebedor <richeve.bebedor@gmail.com>
+
+---
+
+License
+-------
+
+MIT License. See LICENSE.
