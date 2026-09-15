@@ -109,3 +109,10 @@
 !tests/*-test/go/**/*.go
 !tests/*-test/go/**/*.mod
 # END TESTS
+
+# START TOOLS
+!tools/
+
+!tools/windows/
+!tools/windows/*.exe
+# END TOOLS
