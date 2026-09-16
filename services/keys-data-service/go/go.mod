@@ -11,7 +11,7 @@ require github.com/molecule-man/go-brrr v1.1.0 // indirect
 
 require (
 	github.com/Microsoft/go-winio v0.6.2
-	github.com/gofiber/schema v1.8.6 // indirect
+	github.com/gofiber/schema v1.8.7 // indirect
 	github.com/gofiber/utils/v2 v2.5.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/klauspost/compress v1.20.0 // indirect
