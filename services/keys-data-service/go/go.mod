@@ -7,7 +7,7 @@ require (
 	github.com/tidwall/buntdb v1.3.2
 )
 
-require github.com/molecule-man/go-brrr v1.1.0 // indirect
+require github.com/molecule-man/go-brrr v1.1.1 // indirect
 
 require (
 	github.com/Microsoft/go-winio v0.6.2

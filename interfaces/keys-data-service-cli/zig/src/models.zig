@@ -1,17 +1,17 @@
 pub const Key = struct {
     reference: []const u8,
     name: []const u8,
-    group: ?[]const u8,
-    value: ?[]const u8,
+    group: ?[]const u8 = null,
+    value: ?[]const u8 = null,
 
-    created_at: ?[]const u8,
-    updated_at: ?[]const u8,
+    created_at: ?[]const u8 = null,
+    updated_at: ?[]const u8 = null,
 };
 
 pub const KeyMessage = struct {
     name: []const u8,
-    group: ?[]const u8,
-    value: ?[]const u8,
+    group: ?[]const u8 = null,
+    value: ?[]const u8 = null,
 };
 
 pub const GroupSetKeyMessage = struct {
@@ -57,35 +57,35 @@ pub const Command = enum {
 pub const PushKeyParameters = struct {
     key_file: []const u8,
 
-    key: ?Key,
+    key: ?Key = null,
 };
 
 pub const AddKeyParameters = struct {
     key_message_file: []const u8,
 
-    key_message: ?KeyMessage,
+    key_message: ?KeyMessage = null,
 };
 
 pub const GetKeyParameters = struct {
     reference: []const u8,
 
-    output_directory: ?[]const u8,
-    output_file: ?[]const u8,
+    output_directory: ?[]const u8 = null,
+    output_file: ?[]const u8 = null,
 };
 
 pub const GetKeysParameters = struct {
     skip: u32,
     limit: u32,
 
-    output_directory: ?[]const u8,
-    output_file: ?[]const u8,
+    output_directory: ?[]const u8 = null,
+    output_file: ?[]const u8 = null,
 };
 
 pub const PopKeyParameters = struct {
     reference: []const u8,
 
-    output_directory: ?[]const u8,
-    output_file: ?[]const u8,
+    output_directory: ?[]const u8 = null,
+    output_file: ?[]const u8 = null,
 };
 
 pub const GroupCountKeysParameters = struct {
@@ -96,8 +96,8 @@ pub const GroupGetKeyParameters = struct {
     group: []const u8,
     key: []const u8,
 
-    output_directory: ?[]const u8,
-    output_file: ?[]const u8,
+    output_directory: ?[]const u8 = null,
+    output_file: ?[]const u8 = null,
 };
 
 pub const GroupSetKeyParameters = struct {
@@ -105,7 +105,7 @@ pub const GroupSetKeyParameters = struct {
     key: []const u8,
     group_set_key_message_file: []const u8,
 
-    group_set_key_message: ?GroupSetKeyMessage,
+    group_set_key_message: ?GroupSetKeyMessage = null,
 };
 
 pub const CheckHealthResult = struct {
@@ -185,7 +185,7 @@ pub const GroupCountKeysResult = struct {
 };
 
 pub const GroupGetKeyResult = struct {
-    value: ?[]const u8,
+    value: ?[]const u8 = null,
 };
 
 pub const GroupSetKeyResult = struct {

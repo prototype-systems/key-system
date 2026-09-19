@@ -6,7 +6,6 @@ const argument = @import("argument.zig");
 const types = @import("types.zig");
 const request = @import("request.zig");
 const constants = @import("constants.zig");
-const slice = @import("slice.zig");
 
 pub fn checkVersionFlag(arguments: []const []const u8, setting: types.Setting) bool {
     return argument.has(arguments, "--version", setting);
@@ -113,10 +112,13 @@ pub fn resolveGetKeysParameters(arguments: []const []const u8, setting: types.Se
         if (!try file.check(output_directory, setting)) return error.OutputDirectoryNotFound;
 
     if (parameters.output_file == null or parameters.output_file.?.len == 0) {
-        var identifier = try slice.stringify(.{ parameters.skip, parameters.limit }, setting);
-        defer slice.release([]const []const u8, &identifier, setting);
+        const skip_string: []const u8 = try std.fmt.allocPrint(setting.allocator, "{d}", .{parameters.skip});
+        defer setting.allocator.free(skip_string);
 
-        parameters.output_file = try file.name(constants.DEFAULT_OUTPUT_LIST_FILE_FORMAT, identifier, constants.DEFAULT_OUTPUT_LIST_FILE_FALLBACK, setting);
+        const limit_string: []const u8 = try std.fmt.allocPrint(setting.allocator, "{d}", .{parameters.limit});
+        defer setting.allocator.free(limit_string);
+
+        parameters.output_file = try file.name(constants.DEFAULT_OUTPUT_LIST_FILE_FORMAT, .{ skip_string, limit_string }, constants.DEFAULT_OUTPUT_LIST_FILE_FALLBACK, setting);
     }
 
     return parameters;

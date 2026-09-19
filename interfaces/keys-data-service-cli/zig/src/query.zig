@@ -37,14 +37,14 @@ pub fn build(query: anytype, setting: types.Setting) !Query {
         return error.InvalidQueryType;
     }
 
-    if (metadata.@"struct".is_tuple) {
-        return error.InvalidQueryType;
-    }
-
     const fields = metadata.@"struct".fields;
 
     if (fields.len == 0) {
         return Query.init(setting.allocator);
+    }
+
+    if (metadata.@"struct".is_tuple) {
+        return error.InvalidQueryType;
     }
 
     var query_data = Query.init(setting.allocator);

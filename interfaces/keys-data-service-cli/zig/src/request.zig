@@ -19,25 +19,57 @@ pub fn http(method: std.http.Method, url_path: []const u8, body: ?[]const u8, se
 
     const uri = try std.Uri.parse(url);
 
+    const protocol = std.http.Client.Protocol.fromUri(uri) orelse
+        return error.UnsupportedUriScheme;
+
+    var host_name_buffer: [std.Io.net.HostName.max_len]u8 = undefined;
+    const host_name = try uri.getHost(&host_name_buffer);
+
+    const connection = try client.connectTcpOptions(.{
+        .host = host_name,
+        .port = uri.port orelse switch (protocol) {
+            .plain => @as(u16, 80),
+            .tls => @as(u16, 443),
+        },
+        .protocol = protocol,
+        .timeout = .{ .duration = .{
+            .raw = std.Io.Duration.fromSeconds(5),
+            .clock = .awake,
+        } },
+    });
+
+    var req = try client.request(method, uri, .{
+        .connection = connection,
+        .keep_alive = false,
+    });
+    defer req.deinit();
+
+    if (body) |payload| {
+        req.transfer_encoding = .{ .content_length = payload.len };
+        var body_writer = try req.sendBodyUnflushed(&.{});
+        try body_writer.writer.writeAll(payload);
+        try body_writer.end();
+        try req.connection.?.flush();
+    } else {
+        try req.sendBodiless();
+    }
+
+    var redirect_buffer: [8 * 1024]u8 = undefined;
+    var response = try req.receiveHead(&redirect_buffer);
+
     var response_writer = std.Io.Writer.Allocating.init(setting.allocator);
     defer response_writer.deinit();
 
-    var redirect_buffer: [4096]u8 = undefined;
+    var transfer_buffer: [64]u8 = undefined;
+    const reader = response.reader(&transfer_buffer);
+    _ = try reader.streamRemaining(&response_writer.writer);
 
-    const result = try client.fetch(.{
-        .location = .{ .uri = uri },
-        .method = method,
-        .redirect_buffer = &redirect_buffer,
-        .response_writer = &response_writer.writer,
-        .payload = body,
-    });
+    const result = Response{ .status = @intFromEnum(response.head.status), .body = try response_writer.toOwnedSlice() };
+    errdefer setting.allocator.free(result.body);
 
-    const response = Response{ .status = @intFromEnum(result.status), .body = try response_writer.toOwnedSlice() };
-    errdefer setting.allocator.free(response.body);
+    if (result.status != 200 or result.body.len == 0) return error.ServiceIssue;
 
-    if (response.status != 200 or response.body.len == 0) return error.ServiceIssue;
-
-    return response;
+    return result;
 }
 
 pub fn get(url_path: []const u8, setting: types.Setting) !Response {
