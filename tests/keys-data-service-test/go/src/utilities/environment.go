@@ -1,7 +1,7 @@
 package utilities
 
 import (
-	"keys-data-service-test/go/settings"
+	"keys-data-service-test/settings"
 	"os"
 )
 

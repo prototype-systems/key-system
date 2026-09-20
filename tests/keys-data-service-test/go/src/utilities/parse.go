@@ -2,7 +2,7 @@ package utilities
 
 import (
 	"encoding/json"
-	"keys-data-service-test/go/models"
+	"keys-data-service-test/models"
 	"net/http"
 	"testing"
 )

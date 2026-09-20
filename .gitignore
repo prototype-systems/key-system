@@ -33,6 +33,8 @@
 !interfaces/
 !interfaces/*-cli/
 
+!interfaces/**/*.hash
+
 !interfaces/*-cli/zig/
 !interfaces/*-cli/zig/dist/
 !interfaces/*-cli/zig/dist/windows/
@@ -58,42 +60,46 @@
 
 !services/*-service/
 
+!services/**/*.hash
+
 !services/*-service/go/
-!services/*-service/go/channels/
-!services/*-service/go/data/
 !services/*-service/go/dist/
 !services/*-service/go/dist/windows/
 !services/*-service/go/dist/windows/*.exe
-!services/*-service/go/engines/
-!services/*-service/go/handlers/
-!services/*-service/go/libraries/
-!services/*-service/go/utilities/
-!services/*-service/go/models/
-!services/*-service/go/routes/
-!services/*-service/go/services/
-!services/*-service/go/settings/
-!services/*-service/go/**/*.go
-!services/*-service/go/**/*.mod
+!services/*-service/go/src/
+!services/*-service/go/src/channels/
+!services/*-service/go/src/data/
+!services/*-service/go/src/engines/
+!services/*-service/go/src/handlers/
+!services/*-service/go/src/libraries/
+!services/*-service/go/src/utilities/
+!services/*-service/go/src/models/
+!services/*-service/go/src/routes/
+!services/*-service/go/src/services/
+!services/*-service/go/src/settings/
+!services/*-service/go/src/**/*.go
+!services/*-service/go/src/**/*.mod
 
 !services/**/services/
 !services/**/services/*-service/
 
 !services/**/services/*-service/go/
-!services/**/services/*-service/go/channels/
-!services/**/services/*-service/go/data/
 !services/**/services/*-service/go/dist/
 !services/**/services/*-service/go/dist/windows/
 !services/**/services/*-service/go/dist/windows/*.exe
-!services/**/services/*-service/go/engines/
-!services/**/services/*-service/go/handlers/
-!services/**/services/*-service/go/libraries/
-!services/**/services/*-service/go/utilities/
-!services/**/services/*-service/go/models/
-!services/**/services/*-service/go/routes/
-!services/**/services/*-service/go/services/
-!services/**/services/*-service/go/settings/
-!services/**/services/*-service/go/**/*.go
-!services/**/services/*-service/go/**/*.mod
+!services/**/services/*-service/go/src/
+!services/**/services/*-service/go/src/channels/
+!services/**/services/*-service/go/src/data/
+!services/**/services/*-service/go/src/engines/
+!services/**/services/*-service/go/src/handlers/
+!services/**/services/*-service/go/src/libraries/
+!services/**/services/*-service/go/src/utilities/
+!services/**/services/*-service/go/src/models/
+!services/**/services/*-service/go/src/routes/
+!services/**/services/*-service/go/src/services/
+!services/**/services/*-service/go/src/settings/
+!services/**/services/*-service/go/src/**/*.go
+!services/**/services/*-service/go/src/**/*.mod
 # END SERVICES
 
 # START TESTS
@@ -101,13 +107,14 @@
 !tests/*-test/
 
 !tests/*-test/go/
-!tests/*-test/go/tests
-!tests/*-test/go/models
-!tests/*-test/go/settings
-!tests/*-test/go/libraries
-!tests/*-test/go/utilities
-!tests/*-test/go/**/*.go
-!tests/*-test/go/**/*.mod
+!tests/*-test/go/src/
+!tests/*-test/go/src/tests
+!tests/*-test/go/src/models
+!tests/*-test/go/src/settings
+!tests/*-test/go/src/libraries
+!tests/*-test/go/src/utilities
+!tests/*-test/go/src/**/*.go
+!tests/*-test/go/src/**/*.mod
 # END TESTS
 
 # START TOOLS

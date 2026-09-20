@@ -1,8 +1,8 @@
 package utilities
 
 import (
-	"keys-data-service-test/go/libraries"
-	"keys-data-service-test/go/settings"
+	"keys-data-service-test/libraries"
+	"keys-data-service-test/settings"
 	"net/http"
 	"os/exec"
 	"testing"

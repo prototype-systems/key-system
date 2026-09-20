@@ -11,7 +11,7 @@ const TargetAddress = "http://127.0.0.1:" + TargetPort
 
 const TargetNamespace = "keys-data-service"
 
-var TargetTestDirectory = filepath.Join("services", "general-systems", "keys-data-service", "go")
+var TargetTestDirectory = filepath.Join("services", "general-systems", "keys-data-service", "go", "src")
 
 const TestTimeout = 10 * time.Second
 

@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"keys-data-service-test/go/settings"
-	"keys-data-service-test/go/utilities"
+	"keys-data-service-test/settings"
+	"keys-data-service-test/utilities"
 )
 
 func TestGroupGetKeyFeature(tester *testing.T) {
