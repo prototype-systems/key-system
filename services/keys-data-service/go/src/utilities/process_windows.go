@@ -28,8 +28,14 @@ package utilities
 // ## Step-by-Step Workflow
 //
 // 1. CHECK — silently ask Windows "does a firewall rule with our service name
-//    already exist?" using netsh. If yes, skip everything and return immediately.
-//    This is the fast path on every run after the first.
+//    already exist?" AND that its program path matches the current executable.
+//    If both match, skip everything and return immediately.
+//    This is the fast path on every run after the first for compiled binaries.
+//
+//    When the service is run via "go run ." during testing, the executable is
+//    compiled to a new temp path on every invocation. In that case the rule
+//    exists by name but the program path no longer matches, so we delete the
+//    stale rule and fall through to re-add it for the current path.
 //
 // 2. BUILD THE COMMAND — assemble the netsh arguments that will add an inbound
 //    allow rule for this specific executable file.
@@ -55,7 +61,8 @@ package utilities
 // ## After the First Run
 //
 // The firewall rule is now permanent in Windows Firewall. Every subsequent
-// start goes: check rule → found → return immediately. No UAC, no popup, no delay.
+// start goes: check rule → found, path matches → return immediately. No UAC,
+// no popup, no delay.
 
 import (
 	"keys-data-service/settings"
@@ -103,13 +110,47 @@ func AllowProcess() {
 	executablePath := GetExecutablePath()
 	firewallRuleName := settings.ServiceName
 
-	// Step 1: Check — silently run "netsh show rule". Exit code 0 means the rule
-	// already exists, so we skip everything and return. HideWindow suppresses the
-	// console flash.
-	ruleCheckCommand := exec.Command("netsh", "advfirewall", "firewall", "show", "rule", "name="+firewallRuleName)
+	// Step 1: Check — silently run "netsh show rule verbose". If the rule exists
+	// AND its program path matches the current executable, return immediately.
+	// This is the fast path on every run after the first for compiled binaries.
+	//
+	// If the rule exists but points to a different path (e.g. a stale temp path
+	// left behind by a previous "go run ." invocation), delete it so we can
+	// re-add it with the current path below.
+	ruleCheckCommand := exec.Command("netsh", "advfirewall", "firewall", "show", "rule", "name="+firewallRuleName, "verbose")
 	ruleCheckCommand.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-	if ruleCheckCommand.Run() == nil {
-		return
+	if output, err := ruleCheckCommand.Output(); err == nil {
+		// Rule exists — check whether it already covers the current executable.
+		if strings.Contains(strings.ToLower(string(output)), strings.ToLower(executablePath)) {
+			return
+		}
+
+		// Stale rule: exists by name but program path has changed. Delete it
+		// elevated so we can re-register with the current path.
+		deleteArguments := strings.Join([]string{
+			"advfirewall", "firewall", "delete", "rule",
+			"name=" + firewallRuleName,
+		}, " ")
+
+		deleteVerb, _ := syscall.UTF16PtrFromString("runas")
+		deleteFile, _ := syscall.UTF16PtrFromString("netsh")
+		deleteParams, _ := syscall.UTF16PtrFromString(deleteArguments)
+
+		deleteInfo := &shellExecuteInfo{
+			fMask:        keepProcessHandleOpenFlag,
+			lpVerb:       deleteVerb,
+			lpFile:       deleteFile,
+			lpParameters: deleteParams,
+			nShow:        windows.SW_HIDE,
+		}
+		deleteInfo.cbSize = uint32(unsafe.Sizeof(*deleteInfo))
+
+		shellExecuteExWProc.Call(uintptr(unsafe.Pointer(deleteInfo)))
+
+		if deleteInfo.hProcess != 0 {
+			_, _ = windows.WaitForSingleObject(deleteInfo.hProcess, windows.INFINITE)
+			_ = windows.CloseHandle(deleteInfo.hProcess)
+		}
 	}
 
 	// Step 2: Build the netsh command arguments that will add the inbound allow
